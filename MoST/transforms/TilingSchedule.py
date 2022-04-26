@@ -40,6 +40,34 @@ class TilingSchedule(MoSTSchedule):
             fn = fn.simplify()
         return fn
 
+    #a 2d list containing the mappings
+    #order of self.tile_dict has to follow right order of loops -- can change if needed to output dictionary
+    # [] throws error if it is a tile but can be modified to accomodate that. 
+    #TODO: Error checks
+    def CoSA_apply(self, fn):
+        loop_vars = getNestVars(fn)
+        full_tile_dict = {}
+        tiles = dict()
+        for i in range(len(loop_vars)):
+            full_tile_dict[loop_vars[i]] = self.tile_dict[i]
+        i = 0
+        while full_tile_dict:
+            tiles = {}
+            for x in full_tile_dict.keys():
+                temp = full_tile_dict[x]
+                #for case when split is 1 or there is just one number to split loop on
+                if(temp[0] == 1 or len(temp) == 1):
+                    full_tile_dict[x].pop(0)
+                    continue
+                tiles[x + "_out" * i] = temp[0]
+                full_tile_dict[x].pop(0)
+            self.tile_dict = tiles
+            fn = self.apply(fn)
+            delete = [key for key in full_tile_dict if full_tile_dict[key] == []]
+            for key in delete: del full_tile_dict[key]
+            i += 1
+        return fn
+
     # generates tiles for projective nested loops
     # see https://arxiv.org/abs/2003.00119
     # but this also includes ability to determine optimal alloc

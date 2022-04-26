@@ -129,3 +129,30 @@ def __debug_new_sgemm():
                   #D[i,j] = A[0,0] + E
                   C[i, j] += A[i, k] * B[k, j]
   return sgemm_full
+
+def __debug_new_sgemm2():
+    @proc
+    def sgemm_full(
+        R: size,
+        S: size,
+        P: size,
+        Q: size,
+        C: size,
+        K: size,
+        N: size,
+        X: f32[R, S] @ DRAM,
+        A: f32[R, P] @ DRAM,
+        B: f32[P, S] @ DRAM,
+        #D: f32[N, M] @ DRAM,
+        #E: f32 @ DRAM
+
+    ):
+        for i in par(0, R):
+            for j in par(0, S):
+                for k in par(0, P):
+                    for l in par(0, Q):
+                      for m in par(0, C):
+                        for n in par(0, K):
+                          for o in par(0, N):
+                            X[i, j] += A[i, k] * B[k, j]
+    return sgemm_full
